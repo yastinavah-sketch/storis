@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СДЭК ЮГ | Конструктор Каруселей 4:5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@3.4.0/dist/dom-to-image-more.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sdek: { green:'#00A164', orange:'#EF780E', dark:'#11161B', darker:'#0B0E11', gray:'#1F272F', lightGray:'#9CA3AF' }
+                    },
+                    fontFamily: { sans:['Manrope','sans-serif'], display:['Plus Jakarta Sans','sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:#0B0E11}
+        ::-webkit-scrollbar-thumb{background:#1F272F;border-radius:4px}
+        ::-webkit-scrollbar-thumb:hover{background:#00A164}
+        .slide-card{border-radius:0!important}
+        .chromakey-active-workspace{background-color:#00FF00!important;background-image:none!important;border-color:#00FF00!important}
+        .chromakey-active-workspace .hide-on-chromakey{opacity:0!important;pointer-events:none!important}
+        .chromakey-active-workspace #carouselFrame{box-shadow:none!important;border:none!important}
+
+        /* SLIDE 3 */
+        .slide3-bg{background:linear-gradient(145deg,#0d1a13 0%,#081410 50%,#050f0a 100%);position:relative;overflow:hidden}
+        .slide3-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 65% 55% at 85% 15%,rgba(0,161,100,.13) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 5% 85%,rgba(0,161,100,.07) 0%,transparent 55%);pointer-events:none}
+        .s3-deco{position:absolute;pointer-events:none;user-select:none;line-height:1}
+        .s3-d1{font-size:104px;opacity:.05;top:-14px;right:-10px;transform:rotate(16deg)}
+        .s3-d2{font-size:68px;opacity:.06;bottom:22px;left:-6px;transform:rotate(-13deg)}
+        .s3-d3{font-size:38px;opacity:.07;top:44%;left:46%;transform:translate(-50%,-50%) rotate(8deg)}
+        .s3-d4{font-size:28px;opacity:.08;top:20px;left:24px;transform:rotate(-9deg)}
+        .s3-box{background:rgba(255,255,255,.05);border:1.5px solid rgba(0,161,100,.32);box-shadow:0 0 16px rgba(0,161,100,.08),inset 0 1px 0 rgba(255,255,255,.05)}
+        .s3-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(0,161,100,.12);border:1px solid rgba(0,161,100,.28);color:#00A164;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:4px}
+
+        /* SLIDE 4 */
+        .slide4-bg{background:linear-gradient(150deg,#1a1008 0%,#1e1208 50%,#140e06 100%);position:relative;overflow:hidden}
+        .slide4-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 20% 15%,rgba(239,120,14,.14) 0%,transparent 58%),radial-gradient(ellipse 40% 40% at 88% 82%,rgba(239,120,14,.08) 0%,transparent 55%);pointer-events:none}
+        .slide4-bg::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(-48deg,transparent,transparent 16px,rgba(239,120,14,.02) 16px,rgba(239,120,14,.02) 17px);pointer-events:none}
+        .s4-deco{position:absolute;pointer-events:none;user-select:none;line-height:1}
+        .s4-d1{font-size:110px;opacity:.045;bottom:-16px;right:-6px;transform:rotate(18deg)}
+        .s4-d2{font-size:60px;opacity:.06;top:6px;left:-4px;transform:rotate(-10deg)}
+        .s4-d3{font-size:38px;opacity:.07;top:42%;right:5px;transform:rotate(5deg)}
+        .s4-d4{font-size:26px;opacity:.085;bottom:68px;left:32px;transform:rotate(-7deg)}
+        .s4-word-box{background:linear-gradient(135deg,rgba(239,120,14,.10) 0%,rgba(239,120,14,.04) 100%);border:1.5px solid rgba(239,120,14,.30);box-shadow:0 0 20px rgba(239,120,14,.09),inset 0 1px 0 rgba(255,255,255,.04);position:relative}
+        .s4-word-box::before{content:'';position:absolute;top:0;left:10px;right:10px;height:1px;background:linear-gradient(90deg,transparent,rgba(239,120,14,.4),transparent)}
+        .s4-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(239,120,14,.12);border:1px solid rgba(239,120,14,.28);color:#EF780E;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:4px}
+
+        .noise-ov{position:absolute;inset:0;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px;pointer-events:none}
+
+        .s7-cta-box{background:linear-gradient(135deg,#EF780E 0%,#d4630a 100%);border-radius:14px;box-shadow:0 6px 24px rgba(239,120,14,.33),0 2px 6px rgba(239,120,14,.18)}
+    </style>
+</head>
+<body class="bg-sdek-darker text-white font-sans antialiased min-h-screen flex flex-col selection:bg-sdek-green selection:text-white">
+
+    <header class="border-b border-sdek-gray/50 bg-sdek-dark/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-sdek-green p-2.5 rounded-xl flex items-center justify-center shadow-lg shadow-sdek-green/20">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div>
+                    <h1 class="font-display font-black text-lg tracking-tight flex items-center gap-2">СДЭК ЮГ <span class="text-[10px] bg-sdek-orange text-white px-2 py-0.5 rounded-full font-sans uppercase font-extrabold tracking-widest">ХРОМАКЕЙ 4:5</span></h1>
+                    <p class="text-xs text-sdek-lightGray">Конструктор скриншотов с полной заменой текста</p>
+                </div>
+            </div>
+            <button onclick="toggleChromakey()" id="chromakeyBtn" class="px-4 py-2 text-xs font-black bg-sdek-gray text-sdek-lightGray hover:text-white hover:bg-sdek-gray/80 rounded-xl transition flex items-center gap-2 border border-sdek-gray">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" id="chromakeyDot"></span>Включить Хромакей
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <section class="lg:col-span-6 flex flex-col items-center justify-center py-2">
+            <div id="workspaceContainer" class="w-full max-w-[420px] p-6 rounded-3xl bg-sdek-dark/40 border border-sdek-gray/40 space-y-4 flex flex-col items-center">
+                <p class="text-[11px] uppercase tracking-widest font-bold text-sdek-lightGray text-center hide-on-chromakey">Прямоугольный слайд (Формат 4:5)</p>
+                <div id="carouselFrame" class="relative overflow-hidden rounded-none shadow-2xl border border-sdek-gray/50 w-full" style="aspect-ratio:4/5">
+                    <div id="slidesWrapper" class="flex h-full transition-transform duration-500 ease-out"></div>
+                </div>
+                <div class="bg-sdek-dark border border-sdek-gray/40 rounded-2xl px-4 py-3.5 flex items-center justify-between w-full hide-on-chromakey">
+                    <div class="flex items-center gap-3">
+                        <button onclick="prevSlide()" class="p-1.5 bg-sdek-gray/50 hover:bg-sdek-gray text-sdek-lightGray hover:text-white rounded-lg transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></button>
+                        <div class="flex gap-1.5" id="dotsIndicator"></div>
+                        <button onclick="nextSlide()" class="p-1.5 bg-sdek-gray/50 hover:bg-sdek-gray text-sdek-lightGray hover:text-white rounded-lg transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg></button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="saveSlideAsPNG()" class="px-3.5 py-1.5 bg-sdek-orange/10 hover:bg-sdek-orange/20 text-sdek-orange rounded-xl transition flex items-center gap-1.5 text-xs font-extrabold uppercase">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                            Сохранить PNG
+                        </button>
+                        <button onclick="saveSlidesToClipboard()" class="px-3.5 py-1.5 bg-sdek-green/10 hover:bg-sdek-green/20 text-sdek-green rounded-xl transition flex items-center gap-1.5 text-xs font-extrabold uppercase">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z"/></svg>
+                            Копировать
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lg:col-span-6 bg-sdek-dark/40 border border-sdek-gray/40 rounded-3xl p-6 space-y-6">
+            <div>
+                <h3 class="font-display font-extrabold text-lg text-white flex items-center gap-2"><span class="p-1.5 bg-sdek-orange/10 text-sdek-orange rounded-lg">⚙️</span>Конструктор текстов СДЭК ЮГ</h3>
+                <p class="text-xs text-sdek-lightGray mt-1">Все изменения мгновенно отображаются на слайде.</p>
+            </div>
+            <div class="space-y-3">
+                <label class="block text-xs font-extrabold text-sdek-lightGray uppercase tracking-wider">Выбрать слайд:</label>
+                <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5" id="slideSelectorContainer"></div>
+            </div>
+            <div class="bg-sdek-dark/60 border border-sdek-gray/60 p-5 rounded-2xl space-y-4" id="editorFields"></div>
+            <div class="bg-sdek-green/5 border border-sdek-green/20 rounded-2xl p-4 space-y-2">
+                <h4 class="text-xs font-extrabold text-sdek-green uppercase tracking-wider">📸 Как сделать скриншот:</h4>
+                <ul class="text-xs text-gray-300 space-y-1 list-disc pl-4">
+                    <li>Включите <strong>хромакей</strong> — фон зальётся зелёным.</li>
+                    <li>Сделайте скриншот и удалите зелёный фон в видеоредакторе.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-sdek-gray/30 bg-sdek-dark/50 py-4 text-center text-xs text-sdek-lightGray mt-auto">
+        <p>© 2026 СДЭК ЮГ • HR & B2B Департамент Продаж.</p>
+    </footer>
+
+    <div id="toast" class="fixed bottom-6 right-6 bg-sdek-green border border-white/10 px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-50 flex items-center gap-2">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span id="toastText" class="text-xs font-bold text-white">Готово!</span>
+    </div>
+
+    <script>
+        let currentSlideIndex=0;
+        const totalSlides=7;
+        let chromakeyMode=false,isDragging=false,startX=0,currentX=0;
+
+        const slidesData=[
+            {topText:"Коммуникация на грани ⚡️",category:"B2B Переговоры",title:"Хотите провалить B2B-продажи? 📉",subtitle:"Попробуйте быть лучшими",badge:"ВО ВСЁМ"},
+            {category:"ИСТОРИЧЕСКИЙ КЕЙС",subinfo:"1959 ГОД | Швеция 🇸🇪",text1:"Небольшой автобренд Volvo совершает технологическую революцию.",text2:"Инженер Нильс Болин изобретает легендарный трехточечный ремень безопасности. 🛡️",highlight:"Это был золотой билет. Патент, способный принести миллиарды долларов чистой прибыли."},
+            {category:"НЕОЖИДАННЫЙ ШАГ",text1:"Но руководство Volvo делает ход, который аналитики рынка назвали безумием. 🤯",boxLabel:"Они отдают патент",boxTitle:"БЕСПЛАТНО",boxSubtitle:"абсолютно всем конкурентам в мире",quote:"«Спасение жизней важнее прибыли»."},
+            {category:"ВЕЛИКАЯ СТРАТЕГИЯ",text1:"Они заняли в умах людей всего",mainWord:"ОДНО СЛОВО:",boxWord:"БЕЗОПАСНОСТЬ 🛡️",description:"Думая о машине для семьи, люди выбирали Volvo — без лишних слов."},
+            {category:"B2B ПРАКТИКА",header:"Вернемся к твоим сделкам. 💼",subtitle:"Когда ты заходишь к клиенту и перечисляешь все свои плюсы:",bad1:"❌ «Мы самые быстрые...»",bad2:"❌ «Самые дешевые на рынке...»",bad3:"❌ «И у нас невероятное качество...»",note:"Для крупного бизнеса это белый шум. Никто не верит обещаниям «всего и сразу». Пора менять подход."},
+            {category:"РАБОЧАЯ ТЕХНИКА",header:"Бей в одну точку. 🎯",subtitle:"Продавай ОДНО сильное преимущество под конкретную задачу бизнеса.",badExample:"❌ «Мы доставляем всё по лучшим ценам» (Размыто)",goodExample:"✅ «Мы гарантируем доставку день в день для вашего производства, иначе платим штраф»"},
+            {category:"СДЭК ЮГ • КОМАНДА №1",header:"Ищем B2B-хантеров в лучшую команду на Юге! 🏆",feat1Label:"💵 Фикс-оклад",feat1Value:"Стабильно + %",feat2Label:"📈 Процент с продаж",feat2Value:"Честные 10% со сделок",feat3Label:"🧠 Обучение",feat3Value:"Система & Прокачка",btnText:"Стать частью команды 🚀",btnSubtext:"Ссылка в шапке профиля 🔗"}
+        ];
+
+        const russianLabels={topText:"Верхний подзаголовок",category:"Категория",title:"Заголовок",subtitle:"Подзаголовок",badge:"Оранжевая плашка",subinfo:"Инфо (год/страна)",text1:"Абзац 1",text2:"Абзац 2",highlight:"Цитата в зелёном блоке",boxLabel:"Рамка: текст сверху",boxTitle:"Рамка: большой текст",boxSubtitle:"Рамка: подпись",quote:"Цитата",mainWord:"Текст перед рамкой",boxWord:"Текст в рамке",description:"Описание под рамкой",header:"Заголовок",bad1:"❌ Аргумент 1",bad2:"❌ Аргумент 2",bad3:"❌ Аргумент 3",note:"Вывод",badExample:"Плохой пример",goodExample:"Хороший пример",feat1Label:"Условие 1 (название)",feat1Value:"Условие 1 (значение)",feat2Label:"Условие 2 (название)",feat2Value:"Условие 2 (значение)",feat3Label:"Условие 3 (название)",feat3Value:"Условие 3 (значение)",btnSubtext:"Подпись под кнопкой",btnText:"Текст кнопки CTA"};
+
+        window.onload=function(){renderSlides();renderDots();renderSlideSelectors();renderEditorFields(0);};
+
+        function renderSlides(){
+            const wrapper=document.getElementById('slidesWrapper');
+            wrapper.innerHTML='';
+            slidesData.forEach((slide,index)=>{
+                const slideDiv=document.createElement('div');
+                slideDiv.className="w-full flex-shrink-0 h-full slide-card relative select-none rounded-none";
+                let c='';
+
+                const hdr=`<div class="flex justify-between items-center relative z-10">
+                    <span class="text-[11px] font-black tracking-wider text-sdek-green uppercase flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sdek-green inline-block"></span>СДЭК ЮГ</span>
+                    <span class="text-[10px] uppercase font-bold text-sdek-lightGray tracking-widest">${slide.category||''}</span></div>`;
+
+                // Счётчик слайда — более читаемый: белый текст
+                const ftr=`<div class="flex justify-between items-end relative z-10">
+                    <div></div>
+                    <span class="font-mono text-[11px] font-black text-white/60 tracking-wider">${index+1}/${totalSlides}</span></div>`;
+
+                if(index===0){
+                    c=`<div class="flex flex-col justify-between h-full p-8 bg-sdek-dark">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-black tracking-wider text-sdek-green uppercase flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sdek-green inline-block"></span>СДЭК ЮГ</span>
+                            <span class="text-[10px] font-bold text-sdek-lightGray uppercase tracking-wider">${slide.topText}</span>
+                        </div>
+                        <div class="my-auto space-y-4">
+                            <p class="text-sdek-orange font-extrabold text-xs uppercase tracking-widest">${slide.category}</p>
+                            <h2 class="font-display font-black text-3xl tracking-tight leading-tight text-white">${slide.title}</h2>
+                            <p class="font-sans font-semibold text-lg text-gray-300">${slide.subtitle}
+                                <span class="inline-block font-black text-white px-2.5 py-1 bg-sdek-orange rounded-md transform rotate-1 shadow-md">${slide.badge}</span>
+                            </p>
+                        </div>
+                        ${ftr}</div>`;
+
+                }else if(index===1){
+                    c=`<div class="flex flex-col justify-between h-full p-8 bg-sdek-dark">
+                        ${hdr}
+                        <div class="my-auto space-y-4 z-10">
+                            <div class="inline-block px-2.5 py-1 bg-sdek-gray border border-sdek-gray rounded-md text-[9px] font-black font-mono text-sdek-green">${slide.subinfo}</div>
+                            <p class="text-[13px] text-gray-300 leading-relaxed font-medium">${slide.text1}</p>
+                            <p class="text-[13px] text-gray-300 leading-relaxed font-medium">${slide.text2}</p>
+                            <div class="p-3 bg-sdek-green/10 border-l-4 border-sdek-green rounded-r-xl">
+                                <p class="text-[11px] text-sdek-green font-bold leading-relaxed">${slide.highlight}</p>
+                            </div>
+                        </div>
+                        ${ftr}</div>`;
+
+                }else if(index===2){
+                    // СЛАЙД 3: счётчик белее, цитата одна строка без эмодзи 🙏, убраны лишние декор-элементы слева внизу
+                    const s3ftr=`<div class="flex justify-end items-end relative z-10">
+                        <span class="font-mono text-[11px] font-black text-white/90 tracking-wider">${index+1}/${totalSlides}</span></div>`;
+                    c=`<div class="slide3-bg flex flex-col justify-between h-full p-7">
+                        <span class="s3-deco s3-d1">💸</span>
+                        <span class="s3-deco s3-d3">💡</span>
+                        <span class="s3-deco s3-d4">⚡</span>
+                        <div class="noise-ov"></div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <span class="text-[11px] font-black tracking-wider text-sdek-green uppercase flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-sdek-green inline-block" style="box-shadow:0 0 5px #00A164"></span>СДЭК ЮГ
+                            </span>
+                            <span class="s3-tag">${slide.category||''}</span>
+                        </div>
+                        <div class="my-auto space-y-4 relative z-10">
+                            <p class="text-[14px] text-white leading-relaxed font-semibold">${slide.text1}</p>
+                            <div class="s3-box rounded-xl p-4 text-center">
+                                <p class="text-[9px] uppercase tracking-[0.16em] text-gray-400 font-black mb-1.5">${slide.boxLabel}</p>
+                                <h3 class="font-display font-black tracking-tight text-white leading-none" style="font-size:clamp(1.9rem,7vw,2.3rem);text-shadow:0 2px 18px rgba(255,255,255,.13)">${slide.boxTitle}</h3>
+                                <div class="mt-1.5 mx-auto w-10 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
+                                <p class="text-[11px] text-gray-300 mt-1.5 font-medium">${slide.boxSubtitle}</p>
+                            </div>
+                            <!-- Цитата: одна строка, без 🙏, без кавычки-элемента слева -->
+                            <p class="text-[11px] text-gray-300 italic font-semibold leading-snug whitespace-nowrap overflow-hidden text-ellipsis">${slide.quote}</p>
+                        </div>
+                        ${s3ftr}</div>`;
+
+                }else if(index===3){
+                    // СЛАЙД 4: меньше gap между "всего" и "ОДНО СЛОВО:", смайлик 🛡️ на одной строке с БЕЗОПАСНОСТЬ, описание курсивом и в 2 строки
+                    const s4ftr=`<div class="flex justify-end items-end relative z-10">
+                        <span class="font-mono text-[11px] font-black text-sdek-orange tracking-wider">${index+1}/${totalSlides}</span></div>`;
+                    c=`<div class="slide4-bg flex flex-col justify-between h-full p-7">
+                        <span class="s4-deco s4-d1">🛡️</span>
+                        <span class="s4-deco s4-d2">🔑</span>
+                        <span class="s4-deco s4-d3">⚡</span>
+                        <span class="s4-deco s4-d4">🎯</span>
+                        <div class="noise-ov"></div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <span class="text-[11px] font-black tracking-wider text-sdek-orange uppercase flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-sdek-orange inline-block" style="box-shadow:0 0 5px #EF780E"></span>СДЭК ЮГ
+                            </span>
+                            <span class="s4-tag">${slide.category||''}</span>
+                        </div>
+                        <div class="my-auto text-center relative z-10">
+                            <!-- gap-2 вместо space-y-3 — меньше расстояние -->
+                            <div class="flex flex-col items-center">
+                                <p class="text-[13px] text-gray-300 font-semibold mb-1">${slide.text1}</p>
+                                <h2 class="font-display font-black text-white tracking-[0.13em] uppercase text-sm leading-none mb-3">${slide.mainWord}</h2>
+                                <!-- Рамка: слово + смайлик на одной строке (nowrap) -->
+                                <div class="s4-word-box rounded-xl px-5 py-4 w-full">
+                                    <p class="font-display font-black tracking-tight text-sdek-orange leading-none whitespace-nowrap" style="font-size:clamp(1.25rem,5vw,1.7rem);text-shadow:0 0 28px rgba(239,120,14,.42);word-spacing:0.25em">${slide.boxWord}</p>
+                                </div>
+                                <!-- Описание курсивом, max 2 строки -->
+                                <p class="text-[11px] text-gray-400 leading-snug mt-3 font-medium italic px-1 max-w-[270px]" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${slide.description}</p>
+                            </div>
+                        </div>
+                        ${s4ftr}</div>`;
+
+                }else if(index===4){
+                    c=`<div class="flex flex-col justify-between h-full p-8 bg-sdek-dark">
+                        ${hdr}
+                        <div class="my-auto space-y-4 relative z-10">
+                            <h4 class="text-base font-black text-white">${slide.header}</h4>
+                            <p class="text-xs text-gray-300 leading-relaxed font-medium">${slide.subtitle}</p>
+                            <div class="bg-sdek-gray/40 p-3.5 rounded-xl border border-sdek-gray/60 text-[11px] space-y-1.5 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-red-500/5 rounded-xl border border-red-500/10"></div>
+                                <p class="text-gray-300 line-through decoration-red-500 decoration-2 relative z-10">${slide.bad1}</p>
+                                <p class="text-gray-300 line-through decoration-red-500 decoration-2 relative z-10">${slide.bad2}</p>
+                                <p class="text-gray-300 line-through decoration-red-500 decoration-2 relative z-10">${slide.bad3}</p>
+                            </div>
+                            <p class="text-xs text-sdek-lightGray leading-relaxed font-semibold">${slide.note}</p>
+                        </div>
+                        ${ftr}</div>`;
+
+                }else if(index===5){
+                    c=`<div class="flex flex-col justify-between h-full p-8 bg-sdek-dark">
+                        ${hdr}
+                        <div class="my-auto space-y-4 relative z-10">
+                            <h4 class="text-base font-black text-white">${slide.header}</h4>
+                            <p class="text-xs text-gray-300 leading-relaxed font-medium">${slide.subtitle}</p>
+                            <div class="space-y-2.5 text-[11px]">
+                                <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300"><span class="font-medium">${slide.badExample}</span></div>
+                                <div class="p-3 bg-sdek-green/10 border border-sdek-green/30 rounded-xl text-sdek-green font-bold"><span>${slide.goodExample}</span></div>
+                            </div>
+                        </div>
+                        ${ftr}</div>`;
+
+                }else if(index===6){
+                    c=`<div class="flex flex-col justify-between h-full p-8 bg-sdek-dark">
+                        ${hdr}
+                        <div class="my-auto space-y-4 relative z-10">
+                            <h4 class="text-[16px] font-display font-black text-white leading-tight">${slide.header}</h4>
+                            <div class="bg-sdek-gray/40 p-4 rounded-xl border border-sdek-gray/60 space-y-2.5 text-[11px]">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400 font-semibold">${slide.feat1Label}</span>
+                                    <span class="text-white font-extrabold">${slide.feat1Value}</span>
+                                </div>
+                                <div class="h-px bg-sdek-gray/60"></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400 font-semibold">${slide.feat2Label}</span>
+                                    <span class="text-sdek-green font-black">${slide.feat2Value}</span>
+                                </div>
+                                <div class="h-px bg-sdek-gray/60"></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400 font-semibold">${slide.feat3Label}</span>
+                                    <span class="text-white font-extrabold">${slide.feat3Value}</span>
+                                </div>
+                            </div>
+                            <div class="s7-cta-box px-4 py-3.5 text-center">
+                                <p class="text-white font-black text-xs uppercase tracking-wide leading-snug">${slide.btnText}</p>
+                                <p class="text-white/80 text-[10px] font-bold mt-1.5 leading-snug">${slide.btnSubtext}</p>
+                            </div>
+                        </div>
+                        ${ftr}</div>`;
+                }
+                slideDiv.innerHTML=c;
+                wrapper.appendChild(slideDiv);
+            });
+            updateSliderPosition();
+        }
+
+        function renderEditorFields(index){
+            const slide=slidesData[index];
+            const container=document.getElementById('editorFields');
+            container.innerHTML='';
+            const h=document.createElement('div');
+            h.className="flex justify-between items-center border-b border-sdek-gray/40 pb-2 mb-4";
+            h.innerHTML=`<span class="text-xs font-bold text-sdek-green flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sdek-green inline-block"></span>Редактор: Слайд ${index+1}</span><span class="text-[10px] text-sdek-lightGray italic">Автосохранение</span>`;
+            container.appendChild(h);
+            Object.keys(slide).forEach(key=>{
+                const d=document.createElement('div');d.className="space-y-1.5";
+                const l=document.createElement('label');l.className="block text-xs font-bold text-sdek-lightGray uppercase tracking-wider text-[10px]";l.innerText=russianLabels[key]||key;
+                let inp;
+                const longKeys=['text1','text2','highlight','description','note','title','header','goodExample','badExample','btnText'];
+                if(slide[key].length>40||longKeys.includes(key)){inp=document.createElement('textarea');inp.rows=3;inp.className="w-full bg-sdek-dark border border-sdek-gray rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-sdek-green resize-none";}
+                else{inp=document.createElement('input');inp.type="text";inp.className="w-full bg-sdek-dark border border-sdek-gray rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-sdek-green";}
+                inp.value=slide[key];
+                inp.oninput=e=>{slidesData[index][key]=e.target.value;renderSlides();};
+                d.appendChild(l);d.appendChild(inp);container.appendChild(d);
+            });
+        }
+
+        function renderSlideSelectors(){
+            const c=document.getElementById('slideSelectorContainer');c.innerHTML='';
+            for(let i=0;i<totalSlides;i++){
+                const b=document.createElement('button');
+                b.className=`py-2 text-xs font-black rounded-xl border transition ${i===currentSlideIndex?'bg-sdek-green text-white border-sdek-green':'bg-sdek-gray/40 text-sdek-lightGray border-sdek-gray/60 hover:text-white'}`;
+                b.innerText=`Слайд ${i+1}`;b.onclick=()=>goToSlide(i);c.appendChild(b);
+            }
+        }
+
+        function renderDots(){
+            const c=document.getElementById('dotsIndicator');c.innerHTML='';
+            for(let i=0;i<totalSlides;i++){
+                const d=document.createElement('span');
+                d.className=`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${i===currentSlideIndex?'bg-sdek-green w-4':'bg-sdek-lightGray/40'}`;
+                d.onclick=()=>goToSlide(i);c.appendChild(d);
+            }
+        }
+
+        function goToSlide(i){if(i<0||i>=totalSlides)return;currentSlideIndex=i;updateSliderPosition();renderDots();renderSlideSelectors();renderEditorFields(i);}
+        function nextSlide(){goToSlide(currentSlideIndex<totalSlides-1?currentSlideIndex+1:0);}
+        function prevSlide(){goToSlide(currentSlideIndex>0?currentSlideIndex-1:totalSlides-1);}
+        function updateSliderPosition(){document.getElementById('slidesWrapper').style.transform=`translateX(-${currentSlideIndex*100}%)`;}
+
+        function toggleChromakey(){
+            const ws=document.getElementById('workspaceContainer'),btn=document.getElementById('chromakeyBtn'),dot=document.getElementById('chromakeyDot');
+            chromakeyMode=!chromakeyMode;
+            if(chromakeyMode){ws.classList.add('chromakey-active-workspace');btn.className="px-4 py-2 text-xs font-black bg-green-600 text-white rounded-xl transition flex items-center gap-2 border border-green-500";dot.className="w-2.5 h-2.5 rounded-full bg-white inline-block";triggerToast("Хромакей активирован!");}
+            else{ws.classList.remove('chromakey-active-workspace');btn.className="px-4 py-2 text-xs font-black bg-sdek-gray text-sdek-lightGray hover:text-white hover:bg-sdek-gray/80 rounded-xl transition flex items-center gap-2 border border-sdek-gray";dot.className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block";triggerToast("Хромакей выключен.");}
+        }
+
+        function saveSlidesToClipboard(){
+            let t="📋 СДЭК ЮГ — ТЕКСТЫ:\n\n";
+            slidesData.forEach((s,i)=>{t+=`[ СЛАЙД ${i+1} ]\n`;Object.keys(s).forEach(k=>{t+=`${russianLabels[k]||k}: ${s[k]}\n`;});t+=`\n`;});
+            const el=document.createElement('textarea');el.value=t;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);
+            triggerToast("Тексты скопированы!");
+        }
+
+        async function saveSlideAsPNG(){
+            const frame=document.getElementById('carouselFrame');
+            triggerToast('Создаём PNG...');
+            const scale=3;
+            const w=frame.offsetWidth*scale;
+            const h=frame.offsetHeight*scale;
+            try{
+                const dataUrl=await domtoimage.toPng(frame,{
+                    width:w,
+                    height:h,
+                    style:{transform:'scale('+scale+')',transformOrigin:'top left',width:frame.offsetWidth+'px',height:frame.offsetHeight+'px'}
+                });
+                const link=document.createElement('a');
+                link.download='sdek_slide_'+(currentSlideIndex+1)+'.png';
+                link.href=dataUrl;
+                link.click();
+                triggerToast('Слайд '+(currentSlideIndex+1)+' сохранён! 🎉');
+            }catch(e){
+                // Запасной вариант — просто скачать через blob
+                try{
+                    const dataUrl2=await domtoimage.toPng(frame);
+                    const link=document.createElement('a');
+                    link.download='sdek_slide_'+(currentSlideIndex+1)+'.png';
+                    link.href=dataUrl2;
+                    link.click();
+                    triggerToast('Слайд '+(currentSlideIndex+1)+' сохранён! 🎉');
+                }catch(e2){triggerToast('Ошибка: попробуйте ещё раз 🔄');console.error(e2);}
+            }
+        }
+
+        function triggerToast(msg){
+            const t=document.getElementById('toast');document.getElementById('toastText').innerText=msg;
+            t.style.opacity='1';t.style.transform='translateY(0)';
+            setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(16px)';},2500);
+        }
+
+        const frame=document.getElementById('carouselFrame');
+        frame.addEventListener('mousedown',e=>{isDragging=true;startX=e.pageX;});
+        frame.addEventListener('mousemove',e=>{if(!isDragging)return;currentX=e.pageX;});
+        frame.addEventListener('mouseup',dragEnd);frame.addEventListener('mouseleave',dragEnd);
+        frame.addEventListener('touchstart',e=>{isDragging=true;startX=e.touches[0].clientX;});
+        frame.addEventListener('touchmove',e=>{if(!isDragging)return;currentX=e.touches[0].clientX;});
+        frame.addEventListener('touchend',dragEnd);
+        function dragEnd(){if(!isDragging)return;isDragging=false;const d=startX-currentX;if(Math.abs(d)>40){if(d>0)nextSlide();else prevSlide();}}
+    </script>
+</body>
+</html>
