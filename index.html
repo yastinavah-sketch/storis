@@ -166,7 +166,6 @@
                     <span class="text-[11px] font-black tracking-wider text-sdek-green uppercase flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sdek-green inline-block"></span>СДЭК ЮГ</span>
                     <span class="text-[10px] uppercase font-bold text-sdek-lightGray tracking-widest">${slide.category||''}</span></div>`;
 
-                // Счётчик слайда — более читаемый: белый текст
                 const ftr=`<div class="flex justify-between items-end relative z-10">
                     <div></div>
                     <span class="font-mono text-[11px] font-black text-white/60 tracking-wider">${index+1}/${totalSlides}</span></div>`;
@@ -200,7 +199,6 @@
                         ${ftr}</div>`;
 
                 }else if(index===2){
-                    // СЛАЙД 3: счётчик белее, цитата одна строка без эмодзи 🙏, убраны лишние декор-элементы слева внизу
                     const s3ftr=`<div class="flex justify-end items-end relative z-10">
                         <span class="font-mono text-[11px] font-black text-white/90 tracking-wider">${index+1}/${totalSlides}</span></div>`;
                     c=`<div class="slide3-bg flex flex-col justify-between h-full p-7">
@@ -222,13 +220,11 @@
                                 <div class="mt-1.5 mx-auto w-10 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
                                 <p class="text-[11px] text-gray-300 mt-1.5 font-medium">${slide.boxSubtitle}</p>
                             </div>
-                            <!-- Цитата: одна строка, без 🙏, без кавычки-элемента слева -->
                             <p class="text-[11px] text-gray-300 italic font-semibold leading-snug whitespace-nowrap overflow-hidden text-ellipsis">${slide.quote}</p>
                         </div>
                         ${s3ftr}</div>`;
 
                 }else if(index===3){
-                    // СЛАЙД 4: меньше gap между "всего" и "ОДНО СЛОВО:", смайлик 🛡️ на одной строке с БЕЗОПАСНОСТЬ, описание курсивом и в 2 строки
                     const s4ftr=`<div class="flex justify-end items-end relative z-10">
                         <span class="font-mono text-[11px] font-black text-sdek-orange tracking-wider">${index+1}/${totalSlides}</span></div>`;
                     c=`<div class="slide4-bg flex flex-col justify-between h-full p-7">
@@ -244,15 +240,12 @@
                             <span class="s4-tag">${slide.category||''}</span>
                         </div>
                         <div class="my-auto text-center relative z-10">
-                            <!-- gap-2 вместо space-y-3 — меньше расстояние -->
                             <div class="flex flex-col items-center">
                                 <p class="text-[13px] text-gray-300 font-semibold mb-1">${slide.text1}</p>
                                 <h2 class="font-display font-black text-white tracking-[0.13em] uppercase text-sm leading-none mb-3">${slide.mainWord}</h2>
-                                <!-- Рамка: слово + смайлик на одной строке (nowrap) -->
                                 <div class="s4-word-box rounded-xl px-5 py-4 w-full">
                                     <p class="font-display font-black tracking-tight text-sdek-orange leading-none whitespace-nowrap" style="font-size:clamp(1.25rem,5vw,1.7rem);text-shadow:0 0 28px rgba(239,120,14,.42);word-spacing:0.25em">${slide.boxWord}</p>
                                 </div>
-                                <!-- Описание курсивом, max 2 строки -->
                                 <p class="text-[11px] text-gray-400 leading-snug mt-3 font-medium italic px-1 max-w-[270px]" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${slide.description}</p>
                             </div>
                         </div>
@@ -379,33 +372,50 @@
             triggerToast("Тексты скопированы!");
         }
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ PNG
         async function saveSlideAsPNG(){
-            const frame=document.getElementById('carouselFrame');
             triggerToast('Создаём PNG...');
-            const scale=3;
-            const w=frame.offsetWidth*scale;
-            const h=frame.offsetHeight*scale;
+            
+            // Фотографируем не всю рамку целиком, а только конкретный текущий слайд. 
+            // Это решает баг обрезки (кропа) вызванный свойствами overflow и трансформациями.
+            const slides = document.querySelectorAll('.slide-card');
+            const targetNode = slides[currentSlideIndex];
+            
+            const scale = 3;
+            const w = targetNode.offsetWidth;
+            const h = targetNode.offsetHeight;
+            
             try{
-                const dataUrl=await domtoimage.toPng(frame,{
-                    width:w,
-                    height:h,
-                    style:{transform:'scale('+scale+')',transformOrigin:'top left',width:frame.offsetWidth+'px',height:frame.offsetHeight+'px'}
+                const dataUrl = await domtoimage.toPng(targetNode, {
+                    width: w * scale,
+                    height: h * scale,
+                    style: {
+                        transform: 'scale(' + scale + ')',
+                        transformOrigin: 'top left',
+                        width: w + 'px',
+                        height: h + 'px',
+                        margin: 0
+                    }
                 });
-                const link=document.createElement('a');
-                link.download='sdek_slide_'+(currentSlideIndex+1)+'.png';
-                link.href=dataUrl;
+                
+                const link = document.createElement('a');
+                link.download = 'sdek_slide_' + (currentSlideIndex + 1) + '.png';
+                link.href = dataUrl;
                 link.click();
-                triggerToast('Слайд '+(currentSlideIndex+1)+' сохранён! 🎉');
-            }catch(e){
-                // Запасной вариант — просто скачать через blob
+                triggerToast('Слайд ' + (currentSlideIndex + 1) + ' сохранён! 🎉');
+            } catch(e) {
+                // Запасной вариант если масштабирование по какой-то причине упадет
                 try{
-                    const dataUrl2=await domtoimage.toPng(frame);
-                    const link=document.createElement('a');
-                    link.download='sdek_slide_'+(currentSlideIndex+1)+'.png';
-                    link.href=dataUrl2;
+                    const dataUrl2 = await domtoimage.toPng(targetNode);
+                    const link = document.createElement('a');
+                    link.download = 'sdek_slide_' + (currentSlideIndex + 1) + '.png';
+                    link.href = dataUrl2;
                     link.click();
-                    triggerToast('Слайд '+(currentSlideIndex+1)+' сохранён! 🎉');
-                }catch(e2){triggerToast('Ошибка: попробуйте ещё раз 🔄');console.error(e2);}
+                    triggerToast('Слайд ' + (currentSlideIndex + 1) + ' сохранён! 🎉');
+                } catch(e2) {
+                    triggerToast('Ошибка: попробуйте ещё раз 🔄');
+                    console.error(e2);
+                }
             }
         }
 
