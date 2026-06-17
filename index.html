@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>СДЭК ЮГ | Конструктор Каруселей 4:5</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@3.4.0/dist/dom-to-image-more.min.js"></script>
+    <!-- Заменили dom-to-image на html2canvas для идеального рендера -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
@@ -372,50 +373,37 @@
             triggerToast("Тексты скопированы!");
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ PNG
+        // НОВАЯ, НАДЕЖНАЯ ФУНКЦИЯ СОХРАНЕНИЯ ЧЕРЕЗ HTML2CANVAS
         async function saveSlideAsPNG(){
             triggerToast('Создаём PNG...');
             
-            // Фотографируем не всю рамку целиком, а только конкретный текущий слайд. 
-            // Это решает баг обрезки (кропа) вызванный свойствами overflow и трансформациями.
-            const slides = document.querySelectorAll('.slide-card');
-            const targetNode = slides[currentSlideIndex];
+            if (typeof html2canvas === 'undefined') {
+                triggerToast('Ошибка: библиотека не загружена');
+                return;
+            }
+
+            // Фотографируем главный контейнер карусели
+            const frame = document.getElementById('carouselFrame');
             
-            const scale = 3;
-            const w = targetNode.offsetWidth;
-            const h = targetNode.offsetHeight;
-            
-            try{
-                const dataUrl = await domtoimage.toPng(targetNode, {
-                    width: w * scale,
-                    height: h * scale,
-                    style: {
-                        transform: 'scale(' + scale + ')',
-                        transformOrigin: 'top left',
-                        width: w + 'px',
-                        height: h + 'px',
-                        margin: 0
-                    }
+            try {
+                // html2canvas автоматически игнорирует скрытые элементы (из-за overflow: hidden)
+                // и делает 1:1 копию того, что отображается на экране пользователя
+                const canvas = await html2canvas(frame, {
+                    scale: 3, // Высокое разрешение (x3)
+                    useCORS: true, // Позволяет корректно загружать шрифты и внешние элементы
+                    backgroundColor: null, // Оставляем фон прозрачным (слайд сам задает цвет)
+                    logging: false
                 });
-                
+
+                const dataUrl = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
                 link.download = 'sdek_slide_' + (currentSlideIndex + 1) + '.png';
                 link.href = dataUrl;
                 link.click();
                 triggerToast('Слайд ' + (currentSlideIndex + 1) + ' сохранён! 🎉');
             } catch(e) {
-                // Запасной вариант если масштабирование по какой-то причине упадет
-                try{
-                    const dataUrl2 = await domtoimage.toPng(targetNode);
-                    const link = document.createElement('a');
-                    link.download = 'sdek_slide_' + (currentSlideIndex + 1) + '.png';
-                    link.href = dataUrl2;
-                    link.click();
-                    triggerToast('Слайд ' + (currentSlideIndex + 1) + ' сохранён! 🎉');
-                } catch(e2) {
-                    triggerToast('Ошибка: попробуйте ещё раз 🔄');
-                    console.error(e2);
-                }
+                console.error('Ошибка сохранения:', e);
+                triggerToast('Ошибка при сохранении 🔄');
             }
         }
 
